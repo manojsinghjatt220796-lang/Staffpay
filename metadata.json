@@ -1,0 +1,8 @@
+{
+  "name": "StaffPay",
+  "description": "All-in-one employee management, attendance, leave, payroll, and expense platform for growing businesses.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

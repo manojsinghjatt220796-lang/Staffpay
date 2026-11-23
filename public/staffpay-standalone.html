@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StaffPay — Standalone Preview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body class="bg-[#0f172a] text-slate-100 antialiased">
+    <div id="root"></div>
+
+    <script type="text/babel">
+      const { useState, useContext, createContext } = React;
+
+      const SubscriptionContext = createContext();
+
+      function SubscriptionProvider({ children }) {
+        const [plan, setPlan] = useState('free');
+        const [upgradeOpen, setUpgradeOpen] = useState(false);
+        const [lockedTitle, setLockedTitle] = useState('Growth Plan Feature');
+
+        const isPaid = plan === 'paid';
+        const openUpgrade = (title) => {
+          setLockedTitle(title || 'Growth Plan Feature');
+          setUpgradeOpen(true);
+        };
+
+        return (
+          <SubscriptionContext.Provider
+            value={{
+              plan,
+              isPaid,
+              setPlan,
+              upgradeOpen,
+              setUpgradeOpen,
+              lockedTitle,
+              openUpgrade,
+              upgradeToPaid: () => {
+                setPlan('paid');
+                setUpgradeOpen(false);
+              },
+            }}
+          >
+            {children}
+          </SubscriptionContext.Provider>
+        );
+      }
+
+      const INITIAL_EMPLOYEES = [
+        { id: 1, name: 'Arjun Deshmukh', role: 'Fleet Operations Manager', phone: '+91 98204 11230', status: 'Active', base: 68000, allowances: 14500 },
+        { id: 2, name: 'Neha Kulkarni', role: 'Senior Payroll Accountant', phone: '+91 98204 22819', status: 'Active', base: 56000, allowances: 11200 },
+        { id: 3, name: 'Vikramaditya Nair', role: 'Warehouse Supervisor', phone: '+91 98192 44018', status: 'Active', base: 42000, allowances: 8400 },
+        { id: 4, name: 'Rohan Malhotra', role: 'Route Dispatch Coordinator', phone: '+91 99675 88310', status: 'On Leave', base: 36000, allowances: 6800 },
+        { id: 5, name: 'Ananya Iyer', role: 'HR & Compliance Specialist', phone: '+91 98330 76204', status: 'Active', base: 48000, allowances: 9600 },
+        { id: 6, name: 'Suresh Jadhav', role: 'Lead Fleet Technician', phone: '+91 97690 31542', status: 'Active', base: 34000, allowances: 5500 },
+        { id: 7, name: 'Kavita Verma', role: 'Client Account Executive', phone: '+91 98211 65093', status: 'Active', base: 44000, allowances: 8800 },
+        { id: 8, name: 'Deepak Joshi', role: 'Inventory Control Analyst', phone: '+91 98672 90124', status: 'Probation', base: 31000, allowances: 4900 },
+        { id: 9, name: 'Meera Menon', role: 'Vendor Procurement Officer', phone: '+91 98450 53712', status: 'Active', base: 46000, allowances: 9200 },
+        { id: 10, name: 'Farhan Siddiqui', role: 'Night Shift Hub Lead', phone: '+91 98207 19480', status: 'Active', base: 38000, allowances: 7600 },
+      ];
+
+      function App() {
+        const { isPaid, setPlan, upgradeOpen, setUpgradeOpen, lockedTitle, openUpgrade, upgradeToPaid } =
+          useContext(SubscriptionContext);
+
+        const [route, setRoute] = useState('dashboard');
+        const [employees, setEmployees] = useState(INITIAL_EMPLOYEES);
+        const [leaves, setLeaves] = useState([
+          { id: 1, name: 'Rohan Malhotra', type: 'Earned Leave', dates: 'Nov 22 – Nov 24', status: 'Pending' },
+          { id: 2, name: 'Kavita Verma', type: 'Casual Leave', dates: 'Nov 26 – Nov 27', status: 'Pending' },
+        ]);
+        const [expenses, setExpenses] = useState([
+          { id: 1, title: 'Bhiwandi Hub Diesel Refill', amount: 14850, category: 'Logistics', date: '2026-11-21' },
+          { id: 2, title: 'FASTag Fleet Toll Top-Up', amount: 18600, category: 'Travel & Fuel', date: '2026-11-18' },
+        ]);
+        const [payrollDone, setPayrollDone] = useState(false);
+
+        const nav = [
+          ['dashboard', 'Dashboard'],
+          ['employees', 'Employees'],
+          ['attendance', 'Attendance & Shifts'],
+          ['leaves', 'Leave Management'],
+          ['payroll', 'Payroll'],
+          ['expenses', 'Expenses'],
+          ['reports', 'Reports & Analytics'],
+          ['settings', 'Company Settings'],
+        ];
+
+        return (
+          <div className="min-h-screen flex bg-[#0f172a] text-slate-100">
+            <aside className="w-[260px] bg-[#1e293b] border-r border-slate-800 flex flex-col justify-between p-4 shrink-0">
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-9 h-9 rounded-lg bg-blue-500 flex items-center justify-center font-bold text-white">S</div>
+                  <span className="text-xl font-bold text-white">StaffPay</span>
+                </div>
+                <div className="p-2.5 rounded-lg bg-slate-900/70 border border-slate-700 mb-4">
+                  <div className="text-sm font-medium text-white truncate">Meridian Logistics Pvt. Ltd.</div>
+                  <div className="text-xs text-slate-400">{isPaid ? 'Growth Plan' : 'Free Plan'} · ML</div>
+                </div>
+                <nav className="space-y-1">
+                  {nav.map(([id, label]) => (
+                    <button
+                      key={id}
+                      onClick={() => setRoute(id)}
+                      className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                        route === id ? 'bg-[#2563eb] text-white' : 'text-slate-300 hover:bg-slate-700/50'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </nav>
+              </div>
+              <div className="pt-4 border-t border-slate-700 text-xs">
+                <div className="font-medium text-white">Priya Sharma</div>
+                <div className="text-slate-400">Company Owner</div>
+              </div>
+            </aside>
+
+            <main className="flex-1 p-8 max-w-6xl">
+              {route === 'dashboard' && (
+                <div className="space-y-6">
+                  <h1 className="text-2xl font-semibold text-white">Welcome back, Priya</h1>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div className="bg-[#1e293b] border border-slate-800 rounded-xl p-5">
+                      <div className="text-sm text-slate-400">Total Employees</div>
+                      <div className="text-3xl font-mono font-semibold text-white mt-2">{employees.length}</div>
+                    </div>
+                    <div className="bg-[#1e293b] border border-slate-800 rounded-xl p-5">
+                      <div className="text-sm text-slate-400">Present Today</div>
+                      <div className="text-3xl font-mono font-semibold text-emerald-400 mt-2">9 / {employees.length}</div>
+                    </div>
+                    <div className="bg-[#1e293b] border border-slate-800 rounded-xl p-5">
+                      <div className="text-sm text-slate-400">Pending Leaves</div>
+                      <div className="text-3xl font-mono font-semibold text-amber-400 mt-2">
+                        {leaves.filter((l) => l.status === 'Pending').length}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {route === 'employees' && (
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h1 className="text-xl font-semibold">Employees ({employees.length})</h1>
+                    <button
+                      onClick={() => {
+                        if (!isPaid && employees.length >= 10) {
+                          openUpgrade('Unlimited Employees');
+                          return;
+                        }
+                        setEmployees([
+                          { id: Date.now(), name: 'Siddharth Rao', role: 'Dispatch Lead', phone: '+91 98201 00412', status: 'Active', base: 40000, allowances: 8000 },
+                          ...employees,
+                        ]);
+                      }}
+                      className="px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-sm font-semibold text-white"
+                    >
+                      Add Employee
+                    </button>
+                  </div>
+                  <div className="bg-[#1e293b] border border-slate-800 rounded-xl overflow-hidden">
+                    <table className="w-full text-left text-sm">
+                      <thead className="border-b border-slate-800 text-slate-400 text-xs">
+                        <tr>
+                          <th className="p-3.5">Name</th>
+                          <th className="p-3.5">Role</th>
+                          <th className="p-3.5">Phone</th>
+                          <th className="p-3.5">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800">
+                        {employees.map((e) => (
+                          <tr key={e.id}>
+                            <td className="p-3.5 font-medium text-white">{e.name}</td>
+                            <td className="p-3.5 text-slate-300">{e.role}</td>
+                            <td className="p-3.5 font-mono text-slate-300">{e.phone}</td>
+                            <td className="p-3.5 text-emerald-400">{e.status}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {route === 'payroll' && (
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h1 className="text-xl font-semibold">Payroll</h1>
+                    <button
+                      onClick={() => {
+                        if (!isPaid) return openUpgrade('Automated Payroll Calculation');
+                        setPayrollDone(true);
+                      }}
+                      className={`px-4 py-2 rounded-lg text-sm font-semibold ${
+                        isPaid ? 'bg-blue-500 text-white' : 'bg-slate-700 text-slate-300'
+                      }`}
+                    >
+                      {!isPaid ? '🔒 Run Payroll' : payrollDone ? 'Payroll Processed' : 'Run Payroll'}
+                    </button>
+                  </div>
+                  <div className="bg-[#1e293b] border border-slate-800 rounded-xl overflow-hidden">
+                    <table className="w-full text-left text-sm">
+                      <thead className="border-b border-slate-800 text-slate-400 text-xs">
+                        <tr>
+                          <th className="p-3.5">Employee</th>
+                          <th className="p-3.5 text-right">Base</th>
+                          <th className="p-3.5 text-right">Allowances</th>
+                          <th className="p-3.5 text-right">Deductions</th>
+                          <th className="p-3.5 text-right">Net Pay</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800 font-mono">
+                        {employees.map((e) => {
+                          const ded = Math.min(Math.round(e.base * 0.12), 1800) + 200;
+                          const net = e.base + e.allowances - ded;
+                          return (
+                            <tr key={e.id}>
+                              <td className="p-3.5 font-sans text-white">{e.name}</td>
+                              <td className="p-3.5 text-right">₹{e.base.toLocaleString('en-IN')}</td>
+                              <td className="p-3.5 text-right text-emerald-400">+₹{e.allowances.toLocaleString('en-IN')}</td>
+                              <td className="p-3.5 text-right text-rose-400">-₹{ded.toLocaleString('en-IN')}</td>
+                              <td className="p-3.5 text-right font-semibold text-white">₹{net.toLocaleString('en-IN')}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {route === 'settings' && (
+                <div className="space-y-4">
+                  <h1 className="text-xl font-semibold">Subscription Plan</h1>
+                  <div className="flex gap-3">
+                    <button onClick={() => setPlan('free')} className={`px-4 py-2 rounded-lg text-sm font-medium ${!isPaid ? 'bg-blue-600 text-white' : 'bg-[#1e293b] border border-slate-700'}`}>
+                      Free Plan (₹0)
+                    </button>
+                    <button onClick={() => setPlan('paid')} className={`px-4 py-2 rounded-lg text-sm font-medium ${isPaid ? 'bg-blue-600 text-white' : 'bg-[#1e293b] border border-slate-700'}`}>
+                      Growth Plan (₹2,499/mo)
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {['attendance', 'leaves', 'expenses', 'reports'].includes(route) && (
+                <div className="bg-[#1e293b] border border-slate-800 rounded-xl p-6">
+                  <h1 className="text-xl font-semibold capitalize mb-2">{route}</h1>
+                  {route === 'reports' && !isPaid ? (
+                    <div className="py-10 text-center">
+                      <p className="text-slate-300 mb-4">Upgrade to view full reports</p>
+                      <button onClick={() => openUpgrade('Full Reports')} className="px-4 py-2 bg-blue-500 rounded-lg text-sm font-semibold text-white">
+                        Upgrade Now
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-slate-400">Active {route} workspace for Meridian Logistics Pvt. Ltd.</p>
+                  )}
+                </div>
+              )}
+            </main>
+
+            {upgradeOpen && (
+              <div className="fixed inset-0 bg-slate-950/75 flex items-center justify-center p-4">
+                <div className="max-w-md w-full bg-[#1e293b] border border-slate-700 rounded-xl p-6 space-y-4">
+                  <h2 className="text-lg font-semibold text-white">Upgrade to Growth Plan to unlock this feature.</h2>
+                  <p className="text-sm text-slate-400">Unlock {lockedTitle}, automated PF/ESI payroll, GPS attendance, and report exports.</p>
+                  <div className="flex justify-end gap-3">
+                    <button onClick={() => setUpgradeOpen(false)} className="px-4 py-2 text-sm text-slate-300">Cancel</button>
+                    <button onClick={upgradeToPaid} className="px-4 py-2 text-sm font-semibold bg-blue-500 text-white rounded-lg">Upgrade Now</button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById('root')).render(
+        <SubscriptionProvider>
+          <App />
+        </SubscriptionProvider>
+      );
+    </script>
+  </body>
+</html>
