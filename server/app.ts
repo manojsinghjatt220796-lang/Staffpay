@@ -5,6 +5,7 @@ import type Database from 'better-sqlite3';
 import { serverConfig } from './config.ts';
 import { createAuthRouter } from './routes/auth.ts';
 import { createCompanyApiRouter } from './routes/companyApi.ts';
+import { createSettingsRouter } from './routes/settings.ts';
 import { createSuperAdminRouter } from './routes/superAdmin.ts';
 import { createUploadsRouter } from './routes/uploads.ts';
 
@@ -74,6 +75,7 @@ export function createApiApp(getDbFn: () => Database.Database) {
     }
   });
 
+  app.use('/api/settings', createSettingsRouter(getDbFn));
   app.use('/api/v1/auth', createAuthRouter(getDbFn));
   app.use('/api/v1/super-admin', createSuperAdminRouter(getDbFn));
   app.use('/api/v1/uploads', createUploadsRouter(getDbFn));

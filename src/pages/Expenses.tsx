@@ -54,7 +54,7 @@ export function Expenses() {
         <button
           type="button"
           onClick={() => setModalOpen(true)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+          className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-brand hover:bg-brand/90 rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span>Record Expense</span>
@@ -70,7 +70,7 @@ export function Expenses() {
             onClick={() => setStatusFilter(tab)}
             className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap cursor-pointer ${
               statusFilter === tab
-                ? 'bg-blue-600 text-white'
+                ? 'bg-brand text-white'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >

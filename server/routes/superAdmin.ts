@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import type Database from 'better-sqlite3';
-import { serverConfig } from '../config.ts';
 import {
   buildFeatureMap,
   DEFAULT_FREE_LIMITS,
+  getEffectiveRazorpayConfig,
   mapPlanRow,
   mapSettingsRow,
 } from '../db.ts';
@@ -128,9 +128,7 @@ export function createSuperAdminRouter(getDbFn: () => Database.Database) {
       totalEmployees,
       monthlySubscriptionRevenueInr: Number(revenueRow.total_revenue || 0),
       verifiedTransactionCount: Number(revenueRow.tx_count || 0),
-      paymentGatewayConfigured: Boolean(
-        serverConfig.razorpayKeyId && serverConfig.razorpayKeySecret
-      ),
+      paymentGatewayConfigured: getEffectiveRazorpayConfig(db).configured,
       planBreakdown: planRows.map((p) => ({
         planId: String(p.id),
         planName: String(p.name),

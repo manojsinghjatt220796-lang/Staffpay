@@ -21,6 +21,7 @@ import {
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAppData } from '../context/AppDataContext';
 import { useAuth } from '../context/AuthContext';
+import { useSettings } from '../context/SettingsContext';
 import { useSubscription } from '../context/SubscriptionContext';
 import { UserRole } from '../types/staffpay';
 import { Modal } from './Modal';
@@ -66,12 +67,18 @@ export function Sidebar() {
     setMobileSidebarOpen,
   } = useAppData();
   const { user, setUserRole, lockSession, isLocked, unlockSession } = useAuth();
+  const { settings } = useSettings();
   const { planMeta, hasRbacAccess } = useSubscription();
 
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
+  const [logoError, setLogoError] = useState(false);
   const switcherRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setLogoError(false);
+  }, [settings.appLogoUrl]);
 
   useEffect(() => {
     const handleOutside = (e: MouseEvent) => {
@@ -97,13 +104,22 @@ export function Sidebar() {
               navigate('/dashboard');
               setMobileSidebarOpen(false);
             }}
-            className="flex items-center gap-3 text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-lg"
+            className="flex items-center gap-3 text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-lg min-w-0"
           >
-            <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center text-white font-display font-bold text-lg">
-              S
-            </div>
-            <span className="font-display font-bold text-xl text-white tracking-tight">
-              StaffPay
+            {settings.appLogoUrl && !logoError ? (
+              <img
+                src={settings.appLogoUrl}
+                alt={settings.appName}
+                onError={() => setLogoError(true)}
+                className="w-9 h-9 rounded-lg object-cover bg-white border border-slate-700 shrink-0"
+              />
+            ) : (
+              <div className="w-9 h-9 rounded-lg bg-brand flex items-center justify-center text-white font-display font-bold text-lg shrink-0">
+                {(settings.appName.trim()[0] || 'S').toUpperCase()}
+              </div>
+            )}
+            <span className="font-display font-bold text-xl text-white tracking-tight truncate">
+              {settings.appName}
             </span>
           </button>
 
@@ -225,7 +241,7 @@ export function Sidebar() {
                 className={({ isActive }) =>
                   `w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
                     isActive
-                      ? 'bg-[#2563eb] text-white'
+                      ? 'bg-brand text-white'
                       : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
                   }`
                 }
@@ -268,7 +284,7 @@ export function Sidebar() {
                 className="w-9 h-9 rounded-full object-cover border border-slate-700 shrink-0"
               />
             ) : (
-              <div className="w-9 h-9 rounded-full bg-blue-600 text-white text-xs font-semibold flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 rounded-full bg-brand text-white text-xs font-semibold flex items-center justify-center shrink-0">
                 PS
               </div>
             )}
@@ -323,7 +339,7 @@ export function Sidebar() {
               <button
                 type="button"
                 onClick={lockSession}
-                className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg cursor-pointer"
+                className="px-4 py-2 text-sm font-semibold text-white bg-brand hover:bg-brand/90 rounded-lg cursor-pointer"
               >
                 Lock Session
               </button>

@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  Palette,
   Settings,
   ShieldCheck,
   SlidersHorizontal,
@@ -13,6 +14,7 @@ import {
 } from 'lucide-react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useSettings } from '../../context/SettingsContext';
 
 const SUPER_NAV = [
   { to: '/super-admin/dashboard', label: 'Platform Overview', icon: LayoutDashboard },
@@ -20,12 +22,15 @@ const SUPER_NAV = [
   { to: '/super-admin/free-limits', label: 'Free Plan Limits', icon: SlidersHorizontal },
   { to: '/super-admin/companies', label: 'Companies & Lifecycle', icon: Building2 },
   { to: '/super-admin/settings', label: 'Platform Settings', icon: Settings },
+  { to: '/super-admin/admin-settings', label: 'Admin Settings', icon: Palette },
 ];
 
 export function SuperAdminLayout() {
   const navigate = useNavigate();
   const { superAdminSession, logoutSuperAdmin } = useAuth();
+  const { settings } = useSettings();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [logoError, setLogoError] = useState(false);
 
   const handleLogout = async () => {
     await logoutSuperAdmin();
@@ -36,15 +41,24 @@ export function SuperAdminLayout() {
     <aside className="w-[260px] h-full bg-slate-950 border-r border-slate-800 flex flex-col justify-between text-slate-100 select-none">
       <div className="flex flex-col flex-1 min-h-0">
         <div className="px-5 pt-5 pb-4 flex items-center justify-between border-b border-slate-800/80">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center text-white">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="font-display font-bold text-base text-white leading-tight">
-                StaffPay Admin
+          <div className="flex items-center gap-2.5 min-w-0">
+            {settings.appLogoUrl && !logoError ? (
+              <img
+                src={settings.appLogoUrl}
+                alt={settings.appName}
+                onError={() => setLogoError(true)}
+                className="w-9 h-9 rounded-lg object-cover bg-white border border-slate-700 shrink-0"
+              />
+            ) : (
+              <div className="w-9 h-9 rounded-lg bg-brand flex items-center justify-center text-white shrink-0">
+                <ShieldCheck className="w-5 h-5" />
               </div>
-              <div className="text-[11px] text-blue-400 font-medium">
+            )}
+            <div className="min-w-0">
+              <div className="font-display font-bold text-base text-white leading-tight truncate">
+                {settings.appName} Admin
+              </div>
+              <div className="text-[11px] text-brand font-medium">
                 Super Admin Console
               </div>
             </div>
@@ -71,7 +85,7 @@ export function SuperAdminLayout() {
                 className={({ isActive }) =>
                   `w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                     isActive
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-brand text-white'
                       : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
                   }`
                 }
@@ -146,7 +160,7 @@ export function SuperAdminLayout() {
             </button>
             <div className="flex items-center gap-2 text-sm">
               <span className="font-semibold text-slate-900">
-                StaffPay Commercial SaaS Control Plane
+                {settings.appName} Commercial SaaS Control Plane
               </span>
             </div>
           </div>

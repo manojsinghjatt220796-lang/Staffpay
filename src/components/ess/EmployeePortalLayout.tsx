@@ -12,6 +12,7 @@ import {
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useEss } from '../../context/EssContext';
+import { useSettings } from '../../context/SettingsContext';
 
 const ESS_NAV_ITEMS = [
   { to: '/ess/dashboard', label: 'Home', icon: Home },
@@ -24,10 +25,16 @@ export function EmployeePortalLayout() {
   const navigate = useNavigate();
   const { setUserRole } = useAuth();
   const { profile, notifications, markAllNotificationsRead } = useEss();
+  const { settings } = useSettings();
 
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [loggedOutNotice, setLoggedOutNotice] = useState(false);
+  const [logoError, setLogoError] = useState(false);
+
+  useEffect(() => {
+    setLogoError(false);
+  }, [settings.appLogoUrl]);
 
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -68,12 +75,21 @@ export function EmployeePortalLayout() {
             onClick={() => navigate('/ess/dashboard')}
             className="flex items-center gap-2.5 shrink-0 cursor-pointer"
           >
-            <div className="w-8 h-8 rounded-lg bg-blue-600 text-white font-bold text-base flex items-center justify-center">
-              S
-            </div>
+            {settings.appLogoUrl && !logoError ? (
+              <img
+                src={settings.appLogoUrl}
+                alt={settings.appName}
+                onError={() => setLogoError(true)}
+                className="w-8 h-8 rounded-lg object-cover bg-white border border-gray-200 shrink-0"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-lg bg-brand text-white font-bold text-base flex items-center justify-center shrink-0">
+                {(settings.appName.trim()[0] || 'S').toUpperCase()}
+              </div>
+            )}
             <div className="text-left">
               <span className="font-bold text-lg text-slate-900 tracking-tight">
-                StaffPay
+                {settings.appName}
               </span>
               <span className="hidden sm:inline text-xs text-slate-400 ml-2">
                 Employee Portal
@@ -95,7 +111,7 @@ export function EmployeePortalLayout() {
                   className={({ isActive }) =>
                     `inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap shrink-0 ${
                       isActive
-                        ? 'bg-blue-50 text-blue-700'
+                        ? 'bg-brand text-white'
                         : 'text-slate-600 hover:text-slate-900 hover:bg-gray-100'
                     }`
                   }
@@ -122,7 +138,7 @@ export function EmployeePortalLayout() {
               >
                 <Bell className="w-5 h-5" />
                 {unreadCount > 0 && (
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-blue-600" />
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand" />
                 )}
               </button>
 
@@ -181,7 +197,7 @@ export function EmployeePortalLayout() {
                     className="w-8 h-8 rounded-full object-cover border border-gray-200"
                   />
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-blue-600 text-white text-xs font-semibold flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-full bg-brand text-white text-xs font-semibold flex items-center justify-center">
                     {initials}
                   </div>
                 )}
@@ -265,7 +281,7 @@ export function EmployeePortalLayout() {
                 className={({ isActive }) =>
                   `flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-medium whitespace-nowrap ${
                     isActive
-                      ? 'text-blue-600 bg-blue-50'
+                      ? 'text-brand bg-brand/10'
                       : 'text-slate-500 hover:text-slate-800'
                   }`
                 }

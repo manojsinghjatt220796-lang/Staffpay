@@ -175,7 +175,7 @@ export function Employees() {
               className={`inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                 atPlanLimit
                   ? 'bg-slate-200 text-slate-700 hover:bg-slate-300'
-                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+                  : 'bg-brand hover:bg-brand/90 text-white'
               }`}
             >
               {atPlanLimit ? (
@@ -224,7 +224,7 @@ export function Employees() {
                 onClick={() => setStatusFilter(tab)}
                 className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap cursor-pointer ${
                   statusFilter === tab
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-brand text-white'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >

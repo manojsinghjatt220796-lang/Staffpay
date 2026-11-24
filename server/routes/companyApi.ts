@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import type Database from 'better-sqlite3';
-import { serverConfig } from '../config.ts';
 import {
   computeEffectivePlanForCompany,
   DEFAULT_FREE_LIMITS,
+  getEffectiveRazorpayConfig,
   mapPlanRow,
   mapSettingsRow,
 } from '../db.ts';
@@ -61,9 +61,7 @@ export function createCompanyApiRouter(getDbFn: () => Database.Database) {
       },
       plans: activePlans,
       freeLimits: freePlan?.freeLimits || DEFAULT_FREE_LIMITS,
-      paymentGatewayConfigured: Boolean(
-        serverConfig.razorpayKeyId && serverConfig.razorpayKeySecret
-      ),
+      paymentGatewayConfigured: getEffectiveRazorpayConfig(db).configured,
     });
   });
 
@@ -225,7 +223,9 @@ export function createCompanyApiRouter(getDbFn: () => Database.Database) {
     requireCompanyAccess,
     requireCompanyRole(['Company Owner']),
     (req, res) => {
-      if (!serverConfig.razorpayKeyId || !serverConfig.razorpayKeySecret) {
+      const db = getDbFn();
+      const razorpay = getEffectiveRazorpayConfig(db);
+      if (!razorpay.configured) {
         res.status(503).json({
           error: {
             code: 'PAYMENT_GATEWAY_NOT_CONFIGURED',
@@ -244,7 +244,7 @@ export function createCompanyApiRouter(getDbFn: () => Database.Database) {
           String(razorpayOrderId || ''),
           String(razorpayPaymentId || ''),
           String(razorpaySignature || ''),
-          serverConfig.razorpayKeySecret
+          razorpay.keySecret
         )
       ) {
         res.status(400).json({
@@ -256,7 +256,6 @@ export function createCompanyApiRouter(getDbFn: () => Database.Database) {
         return;
       }
 
-      const db = getDbFn();
       const companyId = String(req.params.companyId);
       const planRow = db
         .prepare(`SELECT * FROM subscription_plans WHERE id = ? AND status = 'active'`)

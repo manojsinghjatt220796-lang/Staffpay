@@ -15,6 +15,7 @@ import {
   PlatformSettings,
   SubscriptionStatus,
 } from '../types/staffpay';
+import { useSettings } from './SettingsContext';
 
 export interface PlanDefinition {
   id: PlanTier;
@@ -307,6 +308,7 @@ export function SubscriptionProvider({
 }: {
   children: React.ReactNode;
 }) {
+  const { settings: globalSettings } = useSettings();
   const [plans, setPlans] = useState<ConfigurablePlan[]>(FALLBACK_CONFIG_PLANS);
   const [freeLimits, setFreeLimits] =
     useState<FreePlanLimits>(FALLBACK_FREE_LIMITS);
@@ -509,7 +511,8 @@ export function SubscriptionProvider({
       return;
     }
 
-    const razorpayKeyId = import.meta.env.VITE_RAZORPAY_KEY_ID || '';
+    const razorpayKeyId =
+      globalSettings.razorpayKeyId || import.meta.env.VITE_RAZORPAY_KEY_ID || '';
     if (
       paymentGatewayConfigured &&
       razorpayKeyId &&
@@ -521,7 +524,7 @@ export function SubscriptionProvider({
           key: razorpayKeyId,
           amount: amountInr * 100,
           currency: 'INR',
-          name: platformSettings.platformName,
+          name: globalSettings.appName || platformSettings.platformName,
           description: `${def.name} Plan (${effectiveCycle})`,
           handler: () => {
             setPlanState(def.id);
@@ -530,7 +533,7 @@ export function SubscriptionProvider({
             setPaymentVerified(true);
             setUpgradeModalOpen(false);
           },
-          theme: { color: '#2563eb' },
+          theme: { color: globalSettings.primaryThemeColor || '#2563eb' },
         });
         rzp.open();
         return;

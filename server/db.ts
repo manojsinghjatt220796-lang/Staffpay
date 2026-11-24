@@ -267,6 +267,21 @@ const MIGRATIONS: { id: string; sql: string }[] = [
       );
     `,
   },
+  {
+    id: '003_global_settings',
+    sql: `
+      CREATE TABLE IF NOT EXISTS settings (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        app_name TEXT NOT NULL DEFAULT 'StaffPay',
+        app_logo_url TEXT NOT NULL DEFAULT '',
+        primary_theme_color TEXT NOT NULL DEFAULT '#2563eb',
+        razorpay_key_id TEXT NOT NULL DEFAULT '',
+        razorpay_key_secret TEXT NOT NULL DEFAULT '',
+        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+      INSERT OR IGNORE INTO settings (id) VALUES (1);
+    `,
+  },
 ];
 
 export function runMigrations(db: Database.Database) {
@@ -458,9 +473,12 @@ const DEFAULT_PLANS: ConfigurablePlan[] = [
 ];
 
 export function ensureBaselineData(db: Database.Database) {
-  // 1. Platform settings row (idempotent)
+  // 1. Platform settings & global branding settings rows (idempotent)
   db.prepare(
     `INSERT OR IGNORE INTO platform_settings (id) VALUES (1)`
+  ).run();
+  db.prepare(
+    `INSERT OR IGNORE INTO settings (id) VALUES (1)`
   ).run();
 
   // 2. Baseline subscription plans (only inserted if plan id missing)
@@ -712,4 +730,31 @@ export function computeEffectivePlanForCompany(
   }
 
   return { plan: assignedPlan, effectiveStatus: status };
+}
+
+export function getEffectiveRazorpayConfig(db: Database.Database): {
+  keyId: string;
+  keySecret: string;
+  configured: boolean;
+} {
+  const row = db
+    .prepare(
+      `SELECT razorpay_key_id, razorpay_key_secret FROM settings WHERE id = 1`
+    )
+    .get() as
+    | { razorpay_key_id?: string; razorpay_key_secret?: string }
+    | undefined;
+
+  const keyId = (serverConfig.razorpayKeyId || row?.razorpay_key_id || '').trim();
+  const keySecret = (
+    serverConfig.razorpayKeySecret ||
+    row?.razorpay_key_secret ||
+    ''
+  ).trim();
+
+  return {
+    keyId,
+    keySecret,
+    configured: Boolean(keyId && keySecret),
+  };
 }

@@ -76,7 +76,7 @@ describe('StaffPay Commercial SaaS Backend & Security Suite', () => {
     const migrations = db
       .prepare('SELECT id FROM schema_migrations ORDER BY id')
       .all() as { id: string }[];
-    assert.equal(migrations.length, 2);
+    assert.equal(migrations.length, 3);
 
     const health = await api('GET', '/api/v1/health');
     assert.equal(health.status, 200);
@@ -508,5 +508,103 @@ describe('StaffPay Commercial SaaS Backend & Security Suite', () => {
       fs.readFileSync(path.join(uploadDir, 'receipt-1.txt'), 'utf8'),
       'receipt-ok'
     );
+  });
+
+  it('10. Supports GET/PUT /api/settings with Super Admin authorization and strict Razorpay secret redaction', async () => {
+    // Public GET returns default branding & never leaks razorpay_key_secret
+    const initialGet = await api('GET', '/api/settings');
+    assert.equal(initialGet.status, 200);
+    assert.equal(initialGet.json.settings.appName, 'StaffPay');
+    assert.equal(initialGet.json.settings.primaryThemeColor, '#2563eb');
+    assert.equal(initialGet.json.settings.razorpayKeySecretConfigured, false);
+    assert.equal('razorpayKeySecret' in initialGet.json.settings, false);
+    assert.equal('razorpay_key_secret' in initialGet.json.settings, false);
+
+    // Unauthenticated PUT is rejected
+    const unauthPut = await api('PUT', '/api/settings', {
+      appName: 'HackedApp',
+      primaryThemeColor: '#111111',
+    });
+    assert.equal(unauthPut.status, 401);
+
+    // Ordinary Company Owner PUT is rejected with 403
+    const ownerPut = await api(
+      'PUT',
+      '/api/settings',
+      {
+        appName: 'OwnerApp',
+        primaryThemeColor: '#111111',
+      },
+      companyOwnerToken
+    );
+    assert.equal(ownerPut.status, 403);
+    assert.equal(ownerPut.json.error.code, 'FORBIDDEN_SUPER_ADMIN_ONLY');
+
+    // Invalid hex color is rejected cleanly
+    const badColor = await api(
+      'PUT',
+      '/api/settings',
+      {
+        appName: 'AcmePay',
+        appLogoUrl: 'https://example.com/logo.png',
+        primaryThemeColor: 'not-a-color',
+        razorpayKeyId: 'rzp_test_12345',
+      },
+      superAdminToken
+    );
+    assert.equal(badColor.status, 400);
+    assert.equal(badColor.json.error.code, 'INVALID_COLOR');
+
+    // Valid Super Admin PUT persists branding, color, and Razorpay secret cleanly
+    const validPut = await api(
+      'PUT',
+      '/api/settings',
+      {
+        appName: 'BharatPay Pro',
+        appLogoUrl: '/assets/brand-logo.png',
+        primaryThemeColor: '#059669',
+        razorpayKeyId: 'rzp_test_superadmin',
+        razorpayKeySecret: 'super_secret_rzp_key_999',
+      },
+      superAdminToken
+    );
+    assert.equal(validPut.status, 200);
+    assert.equal(validPut.json.settings.appName, 'BharatPay Pro');
+    assert.equal(validPut.json.settings.appLogoUrl, '/assets/brand-logo.png');
+    assert.equal(validPut.json.settings.primaryThemeColor, '#059669');
+    assert.equal(validPut.json.settings.razorpayKeyId, 'rzp_test_superadmin');
+    assert.equal(validPut.json.settings.razorpayKeySecretConfigured, true);
+    assert.equal('razorpayKeySecret' in validPut.json.settings, false);
+    assert.equal('razorpay_key_secret' in validPut.json.settings, false);
+
+    // Subsequent GET returns updated public config without exposing secret
+    const afterGet = await api('GET', '/api/settings');
+    assert.equal(afterGet.status, 200);
+    assert.equal(afterGet.json.settings.appName, 'BharatPay Pro');
+    assert.equal(afterGet.json.settings.primaryThemeColor, '#059669');
+    assert.equal(afterGet.json.settings.razorpayKeySecretConfigured, true);
+    assert.equal('razorpayKeySecret' in afterGet.json.settings, false);
+    assert.equal('razorpay_key_secret' in afterGet.json.settings, false);
+
+    // Public platform catalog reflects gateway readiness from settings
+    const pubCatalog = await api('GET', '/api/v1/platform/public');
+    assert.equal(pubCatalog.status, 200);
+    assert.equal(pubCatalog.json.paymentGatewayConfigured, true);
+    assert.equal(pubCatalog.json.settings.platformName, 'BharatPay Pro');
+
+    // Updating without razorpayKeySecret preserves stored secret in SQLite
+    const preservePut = await api(
+      'PUT',
+      '/api/settings',
+      {
+        appName: 'StaffPay',
+        appLogoUrl: '',
+        primaryThemeColor: '#2563eb',
+        razorpayKeyId: 'rzp_test_superadmin',
+      },
+      superAdminToken
+    );
+    assert.equal(preservePut.status, 200);
+    assert.equal(preservePut.json.settings.razorpayKeySecretConfigured, true);
   });
 });

@@ -43,7 +43,7 @@ export function CompanySettings() {
             onClick={() => setTab('subscription')}
             className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer ${
               tab === 'subscription'
-                ? 'bg-blue-600 text-white'
+                ? 'bg-brand text-white'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -55,7 +55,7 @@ export function CompanySettings() {
             onClick={() => setTab('profile')}
             className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer ${
               tab === 'profile'
-                ? 'bg-blue-600 text-white'
+                ? 'bg-brand text-white'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -133,7 +133,7 @@ export function CompanySettings() {
             </div>
             <button
               type="submit"
-              className="px-5 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors cursor-pointer"
+              className="px-5 py-2 text-sm font-semibold text-white bg-brand hover:bg-brand/90 rounded-lg transition-colors cursor-pointer"
             >
               Save Changes
             </button>

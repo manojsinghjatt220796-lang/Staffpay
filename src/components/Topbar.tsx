@@ -111,7 +111,7 @@ export function Topbar() {
               onClick={handleQuickRunPayroll}
               className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-gray-50 border border-gray-300 rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
             >
-              <Play className="w-3.5 h-3.5 text-blue-600" />
+              <Play className="w-3.5 h-3.5 text-brand" />
               <span>{language === 'hi' ? 'पेरोल चलाएं' : 'Run Payroll'}</span>
             </button>
           )}
@@ -120,7 +120,7 @@ export function Topbar() {
             <button
               type="button"
               onClick={() => navigate('/settings')}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-brand hover:bg-brand/90 rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
             >
               <span>{language === 'hi' ? 'प्लान अपग्रेड' : 'Upgrade Plan'}</span>
               <ArrowUpRight className="w-3.5 h-3.5" />

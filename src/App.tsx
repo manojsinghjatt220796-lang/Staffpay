@@ -7,6 +7,7 @@ import { UpgradeModal } from './components/UpgradeModal';
 import { AppDataProvider } from './context/AppDataContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { EssProvider } from './context/EssContext';
+import { SettingsProvider } from './context/SettingsContext';
 import { SubscriptionProvider } from './context/SubscriptionContext';
 import { ArchivedEmployees } from './pages/ArchivedEmployees';
 import { Attendance } from './pages/Attendance';
@@ -23,6 +24,7 @@ import { LeaveManagement } from './pages/LeaveManagement';
 import { Payroll } from './pages/Payroll';
 import { Reports } from './pages/Reports';
 import { SalaryRules } from './pages/SalaryRules';
+import { AdminSettings } from './pages/super-admin/AdminSettings';
 import { SuperAdminAuthGate } from './pages/super-admin/SuperAdminAuthGate';
 import { SuperAdminCompanies } from './pages/super-admin/SuperAdminCompanies';
 import { SuperAdminDashboard } from './pages/super-admin/SuperAdminDashboard';
@@ -84,6 +86,7 @@ function AppRoutes() {
         <Route path="free-limits" element={<SuperAdminFreeLimits />} />
         <Route path="companies" element={<SuperAdminCompanies />} />
         <Route path="settings" element={<SuperAdminSettings />} />
+        <Route path="admin-settings" element={<AdminSettings />} />
         <Route path="*" element={<Navigate to="/super-admin/dashboard" replace />} />
       </Route>
 
@@ -113,13 +116,15 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <SubscriptionProvider>
-          <AppDataProvider>
-            <EssProvider>
-              <AppRoutes />
-            </EssProvider>
-          </AppDataProvider>
-        </SubscriptionProvider>
+        <SettingsProvider>
+          <SubscriptionProvider>
+            <AppDataProvider>
+              <EssProvider>
+                <AppRoutes />
+              </EssProvider>
+            </AppDataProvider>
+          </SubscriptionProvider>
+        </SettingsProvider>
       </AuthProvider>
     </BrowserRouter>
   );

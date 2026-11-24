@@ -527,7 +527,7 @@ export function Attendance() {
           <button
             type="button"
             onClick={openCreateShift}
-            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors whitespace-nowrap cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-brand hover:bg-brand/90 rounded-lg transition-colors whitespace-nowrap cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>+ New Shift</span>
@@ -603,7 +603,7 @@ export function Attendance() {
               onClick={() => setActiveTab(id)}
               className={`pb-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                 isActive
-                  ? 'border-blue-600 text-blue-600'
+                  ? 'border-brand text-brand'
                   : 'border-transparent text-slate-500 hover:text-slate-800'
               }`}
             >
@@ -763,7 +763,7 @@ export function Attendance() {
             <button
               type="button"
               onClick={() => setBulkModalOpen(true)}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-brand hover:bg-brand/90 rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
             >
               <CheckCircle2 className="w-4 h-4" />
               <span>Bulk Mark Attendance</span>
@@ -1027,7 +1027,7 @@ export function Attendance() {
                 <button
                   type="button"
                   onClick={handleSaveAttendance}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors whitespace-nowrap cursor-pointer"
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-brand hover:bg-brand/90 rounded-lg transition-colors whitespace-nowrap cursor-pointer"
                 >
                   <Save className="w-4 h-4" />
                   <span>Save Attendance</span>
